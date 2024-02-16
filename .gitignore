@@ -138,7 +138,6 @@ package-lock.json
 
 upload_static_file.py
 .gitlab-ci.yml
-Dockerfile
 tutorial-env
 project-env
 get-pip.py
