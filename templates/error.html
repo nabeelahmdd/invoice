@@ -1,0 +1,29 @@
+{% if form.errors %} {% for field in form %} {% for error in field.errors %}
+<div class="toast-container" style="position: absolute; top: 20px; right: 10px">
+  <div
+    class="toast align-items-center text-white bg-danger border-0 alert-dismissible fade show"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    <div class="d-flex">
+      <div class="toast-body">{{ error|escape }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+{% endfor %} {% endfor %} {% for error in form.non_field_errors %}
+<div class="toast-container" style="position: absolute; top: 20px; right: 10px">
+  <div
+    class="toast align-items-center text-white bg-danger border-0 alert-dismissible fade show"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    <div class="d-flex">
+      <div class="toast-body">{{ error|escape }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+{% endfor %} {% endif %}

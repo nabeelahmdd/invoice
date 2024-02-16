@@ -1,0 +1,13 @@
+.side-by-side {
+    display: flex;
+    align-items: center; /* Aligns items vertically in the center */
+    justify-content: start; /* Aligns items to the start of the container */
+}
+
+.icon-container {
+    margin-right: -20px;
+}
+.bg-error{
+    background-color: #dc3444;
+}
+

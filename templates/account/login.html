@@ -1,0 +1,65 @@
+{% extends "account/base.html" %}
+{% load widget_tweaks %}
+{% load socialaccount %}
+{% load i18n %}
+{% load account %}
+
+{% block content %}
+
+
+<div class="container">
+    <div class="row">
+      <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+        <div class="card border-0 shadow rounded-3 my-5">
+          <div class="card-body p-4 p-sm-5">
+            <h5 class="card-title text-center mb-5 fw-light fs-5">Sign In</h5>
+
+            <form method="post" action="{% url 'account_login' %}">
+                {% csrf_token %}
+                    {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+              <div class="form-floating mb-3">
+                {% render_field form.login type="email" class="form-control" id="floatingInput" placeholder="name@example.com" %}
+                <label for="floatingInput">Email address</label>
+              </div>
+              <div class="form-floating mb-3">
+                {% render_field form.password type="password" class="form-control" id="floatingPassword" placeholder="Enter Your Password" %}
+                
+                <label for="floatingPassword">Password</label>
+              </div>
+
+              <div class="form-check mb-3">
+
+                {% render_field form.remember class="form-check-input" type="checkbox" id="rememberPasswordCheck" %}
+                <label class="form-check-label" for="rememberPasswordCheck">
+                  Remember password
+                </label>
+              </div>
+              <div class="d-grid">
+                <button class="btn btn-primary btn-login text-uppercase fw-bold" type="submit">Sign
+                  in</button>
+              </div>
+              <hr class="my-4">
+              <div class="row mt-3">
+
+                <div class="col-6">
+                  <a href="{% url 'account_reset_password' %}">
+                    <small>Forgot password?</small>
+                  </a>
+                </div>
+                <div class="col-6 text-right">
+                    <a href="{{ signup_url }}">
+                      <small>Create new account</small>
+                  </a>
+                </div>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
