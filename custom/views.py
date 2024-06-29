@@ -7,11 +7,13 @@ from django.urls import reverse_lazy
 from custom.models import SiteSetting
 from custom.forms import SiteSettingForm
 from django.contrib import messages
-
+from invoice.models import *
 User = get_user_model()
 
 # Create your views here.
-class HomeView(generic.TemplateView):
+class HomeView(LoginRequiredMixin, generic.ListView):
+    paginate_by = 10
+    queryset = Invoice.objects.all()
     template_name = "home.html"
 
 

@@ -48,10 +48,12 @@ THIRD_PARTY_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'widget_tweaks',
+    'import_export',
 ]
 
 LOCAL_APPS = [
     'custom', # custom user app
+    'invoice',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

@@ -1,0 +1,212 @@
+<script>
+    var counts = 1;
+
+    function calculate_final(){
+        // final calc
+        var subtotal = 0;
+        var totalMakingCharges = 0;
+        var totalTax = 0;
+        $('#response-table tbody tr').each(function(index, row) {
+            subtotal += parseInt($(this).find('.price').attr('plain-val')) || 0;
+            totalMakingCharges += parseInt($(this).find('.making_charges').text()) || 0;
+            totalTax += parseInt($(this).find('.tax').text()) || 0;
+        });
+        $('#subtotal').text(subtotal);
+        $('#making-charges').text(totalMakingCharges);
+        $('#tax').text(totalTax);
+        $('#total').text(subtotal+totalMakingCharges+totalTax);
+    }
+
+    $(document).on("click", ".remove-element", function () {
+
+        var pk = $(this).attr('pk');
+        if(pk){
+            var data = {
+                csrfmiddlewaretoken: '{{csrf_token}}',
+            }
+
+            dispatch_ajax(`/invoice/product/delete/${pk}/`, data);
+        }
+
+        var rowId = $(this).closest('.grid-container').find(".item-row").attr('preview-id');
+        $(this).closest(".grid-container").remove();
+        var lastRow = $(`#response-table ${rowId}`).remove();
+        calculate_final()
+        counts--;
+    });
+
+    $(document).on("click", ".add-icon", function () {
+        counts++;
+        var html = `
+        <div class="grid-container">
+            <div class="row item-row grid-item" preview-id="#row-${counts}">
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <input type="text" name="name" id="name${counts}" class="form-control item" 
+                        placeholder="Enter product name" required />
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <input type="number" name="rate" id="rate${counts}" class="form-control item" 
+                        placeholder="Enter product rate" required />
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <input type="number" name="weight" id="weight1" class="form-control item"
+                            placeholder="Enter product weight" required />
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <input type="number" name="making_charges" id="making_charges${counts}" class="form-control item" 
+                        placeholder="Enter product making charges" required />
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <input type="number" name="tax" id="tax${counts}" class="form-control item" 
+                        placeholder="Tax" required />
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                </div>
+            </div>
+            <div class="grid-item">
+                <i class="fa fa-close round-element remove-element" style="background-color: red;"></i>
+            </div>
+        </div>`
+        $('#target-section').append(html);
+        var lastRow = $('#response-table tbody tr').last();
+        lastRow.before(
+            ` <tr id="row-${counts}">
+                <td class="text-nowrap name">-</td>
+                <td class="text-nowrap rate">-</td>
+                <td><span class="weight"></span>-grams</td>
+                <td class="making_charges">-</td>
+                <td class="tax">-</td>
+                <td class="price">-</td>
+            </tr>`
+        )
+    });
+
+    $(document).on("click", "#save-form", function () {
+
+        var jsonData = []
+        $('#response-table tbody tr').each(function(index, row) {
+            if($(this).find('.name').text()){
+                jsonData.push({
+                    name: $(this).find('.name').text(), 
+                    rate: parseInt($(this).find('.rate').text()) || 0, 
+                    weight: parseInt($(this).find('.weight').text()) || 0, 
+                    making_charges: parseInt($(this).find('.making_charges').text()) || 0, 
+                    tax: parseInt($(this).find('.tax').text()) || 0, 
+                    price: parseInt($(this).find('.price').text()) || 0, 
+                })
+            }
+        });
+
+        var data = {
+			csrfmiddlewaretoken: '{{csrf_token}}',
+            name: $('.user-info[name="name"]').val(),
+            mobile: $('.user-info[name="mobile"]').val(),
+            address: $('.user-info[name="address"]').val(),
+            city: $('.user-info[name="city"]').val(),
+            zip_code: $('.user-info[name="zip_code"]').val(),
+            state: $('.user-info[name="state"]').val(),
+            country: $('.user-info[name="country"]').val(),
+            jsonData: JSON.stringify(jsonData),
+		}
+
+		dispatch_ajax('.', data);
+    });
+
+    $('.user-info').on('change keyup keydown', function(event) {
+        if($(this).val()){
+            $(`#user-info .${$(this).attr('name')}`).text($(this).val()+',')
+        }
+    });
+
+    
+    function calculate_row(row){
+        var rowTotal = 0
+        var rowMakingCharges = 0
+        var rowTax = 0
+        var rate = row.find("input[name='rate']").val() || 0;
+        var weight = row.find("input[name='weight']").val() || 0;
+        var making_charges = row.find("input[name='making_charges']").val() || 0;
+        var tax = row.find("input[name='tax']").val() || 0;
+        var plainVal = 0
+
+        rowTotal = rate * weight;
+        plainVal = rate * weight
+
+        rowMakingCharges = (making_charges / 100) * rowTotal;
+        rowTotal += rowMakingCharges;
+
+        rowTax = (tax / 100) * rowTotal;
+        rowTotal += rowTax;
+        
+        return {
+            rowTotal: rowTotal, 
+            rowMakingCharges: rowMakingCharges,
+            rowTax: rowTax,
+            plainVal: plainVal,
+        }
+        
+    }
+    $(document).on("change", ".item", function () {
+        var name = $(this).attr('name');
+        var previewID = $(this).closest(".item-row").attr('preview-id');
+        var data = calculate_row($(this).closest('.item-row'));
+
+        $(`#response-table ${previewID} .price`).text(data.rowTotal);
+        $(`#response-table ${previewID} .price`).attr('plain-val', data.plainVal);
+        $(`#response-table ${previewID} .tax`).text(data.rowTax);
+        $(`#response-table ${previewID} .making_charges`).text(data.rowMakingCharges);
+        
+        if(!['making_charges', 'tax'].includes(name)){
+            $(`#response-table ${previewID} .${name}`).text($(this).val());
+        }
+        
+        calculate_final()
+        
+    });
+
+   
+
+    $(document).on("click", "#submit-modal-form", function () {
+        var modalID = $(this).attr('modal-id');
+        var frm = $($(this).attr('form-id'));
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $(modalID).modal('hide');
+                if(data.data){
+                    $('#customer-change').append(
+                        `<option value="${data.data.id}" selected>${data.data.mobile}</option>`
+                    )
+                }
+                dispatch_toast(data.code, data.msg);
+                
+            },
+            error: function(data) {
+                dispatch_toast(data.code, data.msg);
+            }
+        });
+        return false;
+    });
+    
+    $('.print-btn').click(function() {
+        var printContent = $('#sectionToPrint').html();
+        var originalContents = $('body').html();
+
+        $('body').html(printContent); // Replace the body's content with the content of the print section
+        window.print(); // Trigger browser print dialog
+
+        $('body').html(originalContents); // Revert back to the original content after printing
+    });
+</script>
