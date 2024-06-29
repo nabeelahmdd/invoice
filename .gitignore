@@ -141,7 +141,6 @@ upload_static_file.py
 tutorial-env
 project-env
 get-pip.py
-requirements.txt
 open_vpn.sh
 celery.log
 celery.beat.log
