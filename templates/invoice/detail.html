@@ -63,11 +63,11 @@
                                     </svg>
 
                                 </span>
-                                <span class="app-brand-text demo text-body fw-bold">Sneat</span>
+                                <span class="app-brand-text demo text-body fw-bold">Iqra Jewllers</span>
                             </div>
-                            <p class="mb-1">Office 149, 450 South Brand Brooklyn</p>
-                            <p class="mb-1">San Diego County, CA 91905, USA</p>
-                            <p class="mb-0">+1 (123) 456 7891, +44 (876) 543 2198</p>
+                            <p class="mb-1">Manda Gali, Khankaward</p>
+                            <p class="mb-1">Burhanpur, MP (450331)</p>
+                            <p class="mb-0">9691813681</p>
                         </div>
                         <div>
                             <h4>Invoice #{{object.id}} </h4>
@@ -118,11 +118,11 @@
                             {% for i in object.products.all %}
                             <tr id="row-1">
                                 <td class="text-nowrap name">{{ i.name }}</td>
-                                <td class="text-nowrap rate">{{ i.rate }}</td>
-                                <td><span class="weight">{{ i.weight }}</span>-grams</td>
-                                <td class="making_charges">{{ i.making_chatges }}</td>
-                                <td class="tax">{{ i.tax }}</td>
-                                <td class="price">{{ i.price }}</td>
+                                <td class="text-nowrap rate">{{ i.rate|floatformat:2 }}</td>
+                                <td><span class="weight">{{ i.weight|floatformat:2 }}</span>-grams</td>
+                                <td class="making_charges">{{ i.making_chatges|floatformat:2 }}</td>
+                                <td class="tax">{{ i.tax|floatformat:2 }}</td>
+                                <td class="price">{{ i.price|floatformat:2 }}</td>
                             </tr>
                             {% endfor %}
 
@@ -138,13 +138,18 @@
                                     <p class="mb-2">Subtotal:</p>
                                     <p class="mb-2">Making Charges:</p>
                                     <p class="mb-2">Tax:</p>
+                                    <p class="mb-2">Desposit:</p>
                                     <p class="mb-0">Total:</p>
                                 </td>
                                 <td class="px-4 py-5">
-                                    <p class="fw-medium mb-2" id="subtotal">Rs{{object.subtotal}}</p>
-                                    <p class="fw-medium mb-2" id="making-charges">Rs{{object.making_charges}}</p>
-                                    <p class="fw-medium mb-2" id="tax">Rs{{object.tax}}</p>
-                                    <p class="fw-medium mb-0" id="total">Rs{{object.total}}</p>
+                                    <p class="fw-medium mb-2" id="subtotal">Rs{{object.subtotal|floatformat:2}}</p>
+                                    <p class="fw-medium mb-2" id="making-charges">Rs{{object.making_charges|floatformat:2}}</p>
+                                    <p class="fw-medium mb-2" id="tax">Rs{{object.tax|floatformat:2}}</p>
+                                    <p class="fw-medium mb-2">
+                                        Rs{{ object.advance_payment_total|floatformat:2 }}
+                                       
+                                    </p>
+                                    <p class="fw-medium mb-0" id="total">Rs{{object.total|floatformat:2}}</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -155,9 +160,7 @@
                     <div class="row">
                         <div class="col-12">
                             <span class="fw-medium">Note:</span>
-                            <span>It was a pleasure working with you and your team. We hope you will keep us in mind for
-                                future freelance
-                                projects. Thank You!</span>
+                            <span>Thank you for your purchase; we look forward to serving you again!</span>
                         </div>
                     </div>
                 </div>

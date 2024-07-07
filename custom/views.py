@@ -13,8 +13,24 @@ User = get_user_model()
 # Create your views here.
 class HomeView(LoginRequiredMixin, generic.ListView):
     paginate_by = 10
-    queryset = Invoice.objects.all()
+    model = Invoice
     template_name = "home.html"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        filter_field = self.request.GET.get('field')  # Field to filter by
+        filter_value = self.request.GET.get('value')  # Value to filter by
+
+        if filter_field and filter_value:
+            filter_kwargs = {filter_field: filter_value}
+            queryset = queryset.filter(**filter_kwargs)
+
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_invoices'] = Invoice.objects.all().count()
+        return context
 
 
 class UserProfileView(
