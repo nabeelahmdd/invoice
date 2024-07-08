@@ -8,6 +8,8 @@ from custom.models import SiteSetting
 from custom.forms import SiteSettingForm
 from django.contrib import messages
 from invoice.models import *
+from django.http import JsonResponse
+
 User = get_user_model()
 
 # Create your views here.
@@ -18,11 +20,12 @@ class HomeView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        print(self.request.GET)
         filter_field = self.request.GET.get('field')  # Field to filter by
         filter_value = self.request.GET.get('value')  # Value to filter by
 
         if filter_field and filter_value:
-            filter_kwargs = {filter_field: filter_value}
+            filter_kwargs = {f'{filter_field}__icontains': filter_value}
             queryset = queryset.filter(**filter_kwargs)
 
         return queryset
@@ -30,8 +33,27 @@ class HomeView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['total_invoices'] = Invoice.objects.all().count()
+        print(context)
         return context
-
+    
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            invoices = list(context['object_list'].values(
+                'id', 'name', 'mobile', 'address', 'total',
+            ))
+            pagination = {
+                'is_paginated': context['is_paginated'],
+                'current_page': context['page_obj'].number,
+                'num_pages': context['paginator'].num_pages,
+                'has_previous': context['page_obj'].has_previous(),
+                'previous_page_number': context['page_obj'].previous_page_number() if context['page_obj'].has_previous() else None,
+                'has_next': context['page_obj'].has_next(),
+                'next_page_number': context['page_obj'].next_page_number() if context['page_obj'].has_next() else None,
+                'page_range': list(context['paginator'].page_range),
+            }
+            return JsonResponse({'invoices': invoices, 'pagination': pagination})
+        else:
+            return super().render_to_response(context, **response_kwargs)
 
 class UserProfileView(
     LoginRequiredMixin,
