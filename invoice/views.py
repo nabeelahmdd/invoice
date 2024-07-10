@@ -150,8 +150,8 @@ class AdvancePaymentView(
 				AdvancePayment.objects.create(
 					invoice=instance, price=price
 				)
-				instance.total = instance.total - price
-				instance.save()
+				# instance.total = instance.total - price
+				# instance.save()
 				message = 'Advance payment is updated successfully'
 				code = 1
 			else:
@@ -177,9 +177,9 @@ class AdvancePaymentDeleteView(
 		try:
 			instance = AdvancePayment.objects.filter(pk=self.kwargs['pk']).last()
 			if instance:
-				invoice = Invoice.objects.filter(id=self.kwargs["invoice_id"]).last()
-				invoice.total = invoice.total + instance.price
-				invoice.save()
+				# invoice = Invoice.objects.filter(id=self.kwargs["invoice_id"]).last()
+				# invoice.total = invoice.total + instance.price
+				# invoice.save()
 				instance.delete()
 				message = 'Advance payment is deleted successfully'
 				code = 1
