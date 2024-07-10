@@ -8,6 +8,12 @@ import json
 from django.contrib.auth.mixins import LoginRequiredMixin
 from mysite.permission import SuperuserRequiredMixin
 from decimal import Decimal
+from django.http import JsonResponse
+from django.db.models import Q
+from django.core.paginator import Paginator
+from .models import Invoice
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 # Create your views here.
 
 class InvoiceCreateUpdateView(
@@ -196,3 +202,60 @@ class AdvancePaymentDeleteView(
 			'redirect': f'/invoice/edit/{self.kwargs["invoice_id"]}'
 		}
 		return JsonResponse(response)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class InvoiceListView(generic.View):
+    def post(self, request, *args, **kwargs):
+        # Get request parameters
+        draw = int(request.POST.get('draw', 1))
+        start = int(request.POST.get('start', 0))
+        length = int(request.POST.get('length', 10))
+        custom_search = request.POST.get('custom_search', '')  # Change this line
+        order_column = int(request.POST.get('order[0][column]', 0))
+        order_dir = request.POST.get('order[0][dir]', 'asc')
+
+        # Prepare queryset
+        queryset = Invoice.objects.all()
+
+        # Sorting
+        order_columns = ['name', 'mobile', 'total']
+        if order_column < len(order_columns):
+            order_field = order_columns[order_column]
+            if order_dir == 'desc':
+                order_field = f'-{order_field}'
+            queryset = queryset.order_by(order_field)
+
+        # Searching
+        if custom_search:  # Change this line
+            queryset = queryset.filter(
+                Q(name__icontains=custom_search) |
+                Q(mobile__icontains=custom_search) |
+                Q(address__icontains=custom_search) |
+                Q(total__icontains=custom_search)
+            )
+
+        # Total record count
+        total_records = queryset.count()
+
+        # Pagination
+        paginator = Paginator(queryset, length)
+        page = (start // length) + 1
+        data = paginator.get_page(page)
+
+        # Prepare response
+        response = {
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': total_records,
+            'data': [
+                {
+                    'id': invoice.id,
+                    'name': invoice.name,
+                    'mobile': invoice.mobile,
+                    'address': invoice.address,
+                    'total': invoice.total,
+                } for invoice in data
+            ]
+        }
+
+        return JsonResponse(response)
